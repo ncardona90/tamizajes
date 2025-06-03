@@ -599,7 +599,7 @@ class _BsCreateTamizajesWidgetState extends State<BsCreateTamizajesWidget>
                                             Navigator.pop(context);
                                           }
                                         },
-                                        text: 'Crear',
+                                        text: 'Guardar',
                                         options: FFButtonOptions(
                                           height: 50.0,
                                           padding:

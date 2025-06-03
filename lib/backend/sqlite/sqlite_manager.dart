@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import '/backend/sqlite/init.dart';
-import 'queries/read.dart';
 import 'queries/update.dart';
 
 import 'package:sqflite/sqflite.dart';
@@ -28,10 +27,6 @@ class SQLiteManager {
   }
 
   /// START READ QUERY CALLS
-
-  Future<List<ReadTamizajesRow>> readTamizajes() => performReadTamizajes(
-        _database,
-      );
 
   /// END READ QUERY CALLS
 

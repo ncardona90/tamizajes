@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:from_css_color/from_css_color.dart';
 
 import '/backend/sqlite/queries/sqlite_row.dart';
-import '/backend/sqlite/queries/read.dart';
 import '../../flutter_flow/lat_lng.dart';
 import '../../flutter_flow/place.dart';
 import '../../flutter_flow/uploaded_file.dart';
@@ -208,8 +207,6 @@ dynamic deserializeParam<T>(
       case ParamType.SqliteRow:
         final data = json.decode(param) as Map<String, dynamic>;
         switch (T) {
-          case ReadTamizajesRow:
-            return ReadTamizajesRow(data);
           default:
             return null;
         }

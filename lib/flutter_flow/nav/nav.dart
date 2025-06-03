@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 
+import '/main.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 
 import '/index.dart';
@@ -34,32 +35,43 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
-      errorBuilder: (context, state) => HomePageWidget(),
+      errorBuilder: (context, state) => NavBarPage(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
-          builder: (context, _) => HomePageWidget(),
+          builder: (context, _) => NavBarPage(),
         ),
         FFRoute(
           name: HomePageWidget.routeName,
           path: HomePageWidget.routePath,
-          builder: (context, params) => HomePageWidget(),
+          builder: (context, params) => params.isEmpty
+              ? NavBarPage(initialPage: 'HomePage')
+              : HomePageWidget(),
         ),
         FFRoute(
           name: DashboardWidget.routeName,
           path: DashboardWidget.routePath,
-          builder: (context, params) => DashboardWidget(),
+          builder: (context, params) => params.isEmpty
+              ? NavBarPage(initialPage: 'Dashboard')
+              : DashboardWidget(),
         ),
         FFRoute(
           name: FormWidget.routeName,
           path: FormWidget.routePath,
-          builder: (context, params) => FormWidget(),
+          builder: (context, params) =>
+              params.isEmpty ? NavBarPage(initialPage: 'Form') : FormWidget(),
         ),
         FFRoute(
           name: ListWidget.routeName,
           path: ListWidget.routePath,
-          builder: (context, params) => ListWidget(),
+          builder: (context, params) =>
+              params.isEmpty ? NavBarPage(initialPage: 'List') : ListWidget(),
+        ),
+        FFRoute(
+          name: HhhWidget.routeName,
+          path: HhhWidget.routePath,
+          builder: (context, params) => HhhWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
