@@ -1,8 +1,10 @@
 // Automatic FlutterFlow imports
 import '/backend/sqlite/sqlite_manager.dart';
+import '/backend/sqlite/queries/read.dart'; // Importa LeerRow
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
+import '/custom_code/widgets/index.dart'; // Imports other custom widgets
+// import '/flutter_flow/custom_functions.dart'; // ELIMINAR O COMENTAR: Error 'No such file or directory'
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -117,7 +119,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
   ];
   final List<String> _opcionesSiNo = ['Sí', 'No'];
   final List<String> _opcionesComuna =
-      List.generate(22, (i) => (i + 1).toString())..add('Corregimiento');
+  List.generate(22, (i) => (i + 1).toString())..add('Corregimiento');
   final List<String> _opcionesTipoAseguramiento = ['C', 'S', 'SA', 'RE'];
   final List<String> _opcionesFrecuenciaFrutasVerduras = [
     'Diario',
@@ -195,7 +197,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
       String medicacionHipertension, // 'Sí', 'No'
       String glucosaAltaHistorico, // 'Sí', 'No'
       String
-          antecedentesFamiliaresDiabetes // 'Ninguno', 'Pariente lejano', 'Padres o hermanos'
+      antecedentesFamiliaresDiabetes // 'Ninguno', 'Pariente lejano', 'Padres o hermanos'
       ) {
     int score = 0;
 
@@ -214,7 +216,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
     // 3. Circunferencia Abdominal (ajusta el género según tus datos 'Hombre' o 'Mujer')
     // Asumo que 'genero' contendrá 'Hombre' o 'Mujer' según sexo_asignado_nacimiento o genero_identificado
     String normalizedGender = genero.toLowerCase().contains('hombre') ||
-            genero.toLowerCase().contains('masculino')
+        genero.toLowerCase().contains('masculino')
         ? 'hombre'
         : 'mujer';
     if (normalizedGender == 'hombre') {
@@ -273,7 +275,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
       String fuma, // 'Sí', 'No'
       String esDiabetico, // 'Sí', 'No'
       String
-          ecvPrevia // 'Sí', 'No' (Enfermedad Cardiovascular, Renal o Colesterol)
+      ecvPrevia // 'Sí', 'No' (Enfermedad Cardiovascular, Renal o Colesterol)
       ) {
     double riesgoPorcentaje = 0.0;
     String clasificacionRiesgo = 'Indefinido';
@@ -283,13 +285,13 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
       return {
         "riesgoPorcentaje": ">30%",
         "clasificacionRiesgo":
-            "Muy Alto (ECV/ERC/Hipercolesterolemia existente)"
+        "Muy Alto (ECV/ERC/Hipercolesterolemia existente)"
       };
     }
 
     // Adaptar género a lo que espera la tabla OMS si es necesario (ej. 'Masculino' -> 'Hombre')
     String normalizedGender = genero.toLowerCase().contains('hombre') ||
-            genero.toLowerCase().contains('masculino')
+        genero.toLowerCase().contains('masculino')
         ? 'hombre'
         : 'mujer';
 
@@ -377,9 +379,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
   void _initializeFormData() {
     if (widget.initialTamizajeData != null) {
       Map<String, dynamic>? initialMap;
-      if (widget.initialTamizajeData is Tamizaje) {
-        // ! CORRECCIÓN: Usar Tamizaje
-        initialMap = (widget.initialTamizajeData as Tamizaje).toMap();
+      if (widget.initialTamizajeData is LeerRow) { // ¡CORRECCIÓN CLAVE AQUÍ!
+        initialMap = (widget.initialTamizajeData as LeerRow).data; // Usar .data de SqliteRow
         _isEditing = true;
       } else if (widget.initialTamizajeData is Map<String, dynamic>) {
         initialMap = widget.initialTamizajeData as Map<String, dynamic>;
@@ -395,9 +396,9 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
             (_formDataMap['puntaje_findrisc_calculado'] as num?)?.toDouble();
         _riesgoFindriscDisplay = _formDataMap['riesgo_findrisc'] as String?;
         _riesgoOmsPorcentajeDisplay =
-            _formDataMap['riesgo_cardiovascular_oms_porcentaje'] as String?;
+        _formDataMap['riesgo_cardiovascular_oms_porcentaje'] as String?;
         _clasificacionOmsDisplay =
-            _formDataMap['clasificacion_riesgo_cardiovascular_oms'] as String?;
+        _formDataMap['clasificacion_riesgo_cardiovascular_oms'] as String?;
         _otroGrupoEtnicoController.text =
             _formDataMap['otro_grupo_etnico'] ?? '';
       } else {
@@ -433,7 +434,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
       'genero_identificado': null,
       'orientacion_sexual': null,
       'grupo_etnico': null,
-      'otroGrupoEtnico': null,
+      'otro_grupo_etnico': null, // Asegurar snake_case para coincidir con la BD
       'poblacion_condicion_situacion': 'Ninguna',
       'poblacion_migrante': 'No aplica',
       'tiene_seres_sintientes': 'No',
@@ -518,13 +519,13 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
     double? peso = (pesoRaw is num)
         ? pesoRaw.toDouble()
         : (pesoRaw is String
-            ? double.tryParse(pesoRaw.replaceAll(',', '.'))
-            : null);
+        ? double.tryParse(pesoRaw.replaceAll(',', '.'))
+        : null);
     double? talla = (tallaRaw is num)
         ? tallaRaw.toDouble()
         : (tallaRaw is String
-            ? double.tryParse(tallaRaw.replaceAll(',', '.'))
-            : null);
+        ? double.tryParse(tallaRaw.replaceAll(',', '.'))
+        : null);
 
     if (peso != null && talla != null && talla > 0) {
       _imcCalculadoDisplay = calcularIMC(peso, talla);
@@ -542,18 +543,19 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
 
     final edadFINDRISC = _formDataMap['edad'] as int?;
     final imcFINDRISC = _formDataMap['imc'] as double?;
+    // Circunferencia abdominal de LeerRow es String, pero tu cálculo espera double
     final circAbdRaw = _formDataMap['circunferencia_abdominal'];
     final generoFINDRISC = _formDataMap['genero_identificado'] as String? ??
         _formDataMap['sexo_asignado_nacimiento'] as String?;
     final actividadFisicaFINDRISC = _formDataMap['actividad_fisica'] as String?;
     final frutasVerdurasFINDRISC =
-        _formDataMap['frecuencia_frutas_verduras'] as String?;
+    _formDataMap['frecuencia_frutas_verduras'] as String?;
     final medHipertensionFINDRISC =
-        _formDataMap['medicacion_hipertension'] as String?;
+    _formDataMap['medicacion_hipertension'] as String?;
     final glucosaAltaFINDRISC =
-        _formDataMap['glucosa_alta_historico'] as String?;
+    _formDataMap['glucosa_alta_historico'] as String?;
     final antDiabetesFINDRISC =
-        _formDataMap['antecedentes_familiares_diabetes'] as String?;
+    _formDataMap['antecedentes_familiares_diabetes'] as String?;
 
     if (edadFINDRISC != null &&
         imcFINDRISC != null &&
@@ -580,15 +582,19 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
           antDiabetesFINDRISC,
         );
         _formDataMap['riesgo_findrisc'] = _riesgoFindriscDisplay;
-        // _puntajeFindriscDisplay = calcularPuntajeNumericoFINDRISC(...); // Necesitarías esta función
-        // _formDataMap['puntaje_findrisc_calculado'] = _puntajeFindriscDisplay;
+        // _puntajeFindriscDisplay se actualiza dentro de calcularYClasificarFINDRISC
+        _formDataMap['puntaje_findrisc_calculado'] = _puntajeFindriscDisplay;
       } else {
         _riesgoFindriscDisplay = null;
         _formDataMap['riesgo_findrisc'] = null;
+        _puntajeFindriscDisplay = null;
+        _formDataMap['puntaje_findrisc_calculado'] = null;
       }
     } else {
       _riesgoFindriscDisplay = null;
       _formDataMap['riesgo_findrisc'] = null;
+      _puntajeFindriscDisplay = null;
+      _formDataMap['puntaje_findrisc_calculado'] = null;
     }
 
     final edadOMS = _formDataMap['edad'] as int?;
@@ -598,7 +604,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
     final fumaOMS = _formDataMap['fuma'] as String?;
     final esDiabeticoOMS = _formDataMap['es_diabetico'] as String?;
     final ecvPreviaOMS =
-        _formDataMap['enfermedad_cardiovascular_renal_colesterol'] as String?;
+    _formDataMap['enfermedad_cardiovascular_renal_colesterol'] as String?;
 
     if (edadOMS != null &&
         generoOMS != null &&
@@ -631,7 +637,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content:
-                const Text('Por favor, revise los campos marcados con error.'),
+            const Text('Por favor, revise los campos marcados con error.'),
             backgroundColor: Colors.orange),
       );
       return;
@@ -642,127 +648,106 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
 
     _formDataMap['fecha_registro_bd'] = getFormattedCurrentDateTime();
 
-    final Tamizaje tamizajeParaGardar;
     try {
-      tamizajeParaGardar = Tamizaje(
-        // ! CORRECCIÓN: Usar Tamizaje
-        id: _isEditing ? (_formDataMap['id'] as int?) : null,
-        fechaIntervencion: _formDataMap['fecha_intervencion'] as String?,
-        lugarIntervencion: _formDataMap['lugar_intervencion'] as String?,
-        entornoIntervencion: _formDataMap['entorno_intervencion'] as String?,
-        horaInicialIntervencion:
-            _formDataMap['hora_inicial_intervencion'] as String?,
-        horaFinalIntervencion:
-            _formDataMap['hora_final_intervencion'] as String?,
-        codigoTamizajeManual: _formDataMap['codigo_tamizaje_manual'] as String?,
-        nombres: _formDataMap['nombres'] as String? ?? '',
-        apellidos: _formDataMap['apellidos'] as String? ?? '',
-        tipoDoc: _formDataMap['tipo_doc'] as String? ?? 'CC',
-        // --- COMIENZO DE CORRECCIONES TYPEERROR ---
-        numeroDocumento:
-            int.tryParse(_formDataMap['numero_documento']?.toString() ?? '') ??
-                0,
-        nacionalidad: _formDataMap['nacionalidad'] as String?,
-        fechaNacimiento: _formDataMap['fecha_nacimiento'] as String? ??
-            DateFormat('yyyy-MM-dd').format(DateTime(1900, 1, 1)),
-        edad: _formDataMap['edad'] as int?,
-        sexoAsignadoNacimiento:
-            _formDataMap['sexo_asignado_nacimiento'] as String?,
-        generoIdentificado: _formDataMap['genero_identificado'] as String?,
-        orientacionSexual: _formDataMap['orientacion_sexual'] as String?,
-        grupoEtnico: _formDataMap['grupo_etnico'] as String?,
-        otroGrupoEtnico: _formDataMap['otro_grupo_etnico'] as String?,
-        poblacionCondicionSituacion:
-            _formDataMap['poblacion_condicion_situacion'] as String?,
-        poblacionMigrante: _formDataMap['poblacion_migrante'] as String?,
-        tieneSeresSintientes: _formDataMap['tiene_seres_sintientes'] as String?,
-        correoElectronico: _formDataMap['correo_electronico'] as String?,
-        telefonoContacto: _formDataMap['telefono_contacto']?.toString(),
-        direccionResidencia: _formDataMap['direccion_residencia'] as String?,
-        barrioCorregimientoVereda:
-            _formDataMap['barrio_corregimiento_vereda'] as String?,
-        comuna: _formDataMap['comuna'] as String?,
-        eapb: _formDataMap['eapb'] as String?,
-        tipoAseguramiento: _formDataMap['tipo_aseguramiento'] as String?,
-        eps: _formDataMap['eps'] as String?,
-        talla: double.tryParse(
-            _formDataMap['talla']?.toString().replaceAll(',', '.') ?? ''),
-        peso: double.tryParse(
-            _formDataMap['peso']?.toString().replaceAll(',', '.') ?? ''),
-        imc: (_formDataMap['imc'] as num?)
-            ?.toDouble(), // IMC ya se calcula como double, así que debería estar bien.
-        presionSistolica:
-            int.tryParse(_formDataMap['presion_sistolica']?.toString() ?? ''),
-        presionDiastolica:
-            int.tryParse(_formDataMap['presion_diastolica']?.toString() ?? ''),
-        circunferenciaAbdominal: double.tryParse(
-            _formDataMap['circunferencia_abdominal']
-                    ?.toString()
-                    .replaceAll(',', '.') ??
-                ''),
-        actividadFisica: _formDataMap['actividad_fisica'] as String?,
-        frecuenciaFrutasVerduras:
-            _formDataMap['frecuencia_frutas_verduras'] as String?,
-        medicacionHipertension:
-            _formDataMap['medicacion_hipertension'] as String?,
-        glucosaAltaHistorico: _formDataMap['glucosa_alta_historico'] as String?,
-        antecedentesFamiliaresDiabetes:
-            _formDataMap['antecedentes_familiares_diabetes'] as String?,
-        esDiabetico: _formDataMap['es_diabetico'] as String?,
-        tipoDiabetes: _formDataMap['tipo_diabetes'] as String?,
-        fuma: _formDataMap['fuma'] as String?,
-        puntajeFindriscCalculado:
-            (_formDataMap['puntaje_findrisc_calculado'] as num?)?.toDouble(),
-        riesgoFindrisc: _formDataMap['riesgo_findrisc'] as String?,
-        enfermedadCardiovascularRenalColesterol:
-            _formDataMap['enfermedad_cardiovascular_renal_colesterol']
-                as String?,
-        riesgoCardiovascularOmsPorcentaje:
-            _formDataMap['riesgo_cardiovascular_oms_porcentaje'] as String?,
-        clasificacionRiesgoCardiovascularOms:
-            _formDataMap['clasificacion_riesgo_cardiovascular_oms'] as String?,
-        observaciones: _formDataMap['observaciones'] as String?,
-        fechaRegistroBd: _formDataMap['fecha_registro_bd'] as String? ??
-            getFormattedCurrentDateTime(),
-        // --- FIN DE CORRECCIONES TYPEERROR ---
-      );
-    } catch (e, s) {
-      // Modificado para usar un mensaje más informativo y el stack trace.
-      debugPrint(
-          'Error al construir el objeto Tamizaje desde _formDataMap: $e');
-      debugPrint('StackTrace: $s');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                'Error interno al preparar los datos: ${e.toString().split('\n').first}. Revisa la consola para detalles.'),
-            backgroundColor: Colors.red),
-      );
-      return;
-    }
+      // Usamos el 'id' del formDataMap para verificar si estamos editando o creando
+      final int? currentId = _formDataMap['id'] as int?;
 
-    try {
-      if (!_isEditing) {
-        // ! CORRECCIÓN: Usar SQLiteManager.instance para llamar a checkNumeroDocumentoExists
-        bool docExists = await SQLiteManager.instance
-            .checkNumeroDocumentoExists(tamizajeParaGardar.numeroDocumento);
+      if (currentId == null) {
+        // Creando nuevo tamizaje
+        bool docExists = await SQLiteManager.instance.checkNumeroDocumentoExists(
+            _formDataMap['numero_documento'] as int);
         if (docExists) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content:
-                    Text('Error: El número de documento ya está registrado.'),
+                Text('Error: El número de documento ya está registrado.'),
                 backgroundColor: Colors.red),
           );
           return;
         }
-        // ! CORRECCIÓN: Usar SQLiteManager.instance para llamar a createTamizaje (renombrado de createTamizajes)
-        await SQLiteManager.instance.createTamizaje(tamizajeParaGardar);
+
+        await SQLiteManager.instance.createTamizaje(
+          fechaintervencion: _formDataMap['fecha_intervencion'] as String?,
+          lugarintervencion: _formDataMap['lugar_intervencion'] as String?,
+          entornointervencion: _formDataMap['entorno_intervencion'] as String?,
+          horainicialintervencion:
+          _formDataMap['hora_inicial_intervencion'] as String?,
+          horafinalintervencion:
+          _formDataMap['hora_final_intervencion'] as String?,
+          codigotamizajemanual:
+          _formDataMap['codigo_tamizaje_manual'] as String?,
+          nombres: _formDataMap['nombres'] as String? ?? '',
+          apellidos: _formDataMap['apellidos'] as String? ?? '',
+          tipodoc: _formDataMap['tipo_doc'] as String? ?? 'CC',
+          numerodocumento:
+          int.tryParse(_formDataMap['numero_documento']?.toString() ?? '') ??
+              0,
+          nacionalidad: _formDataMap['nacionalidad'] as String?,
+          fechanacimiento: _formDataMap['fecha_nacimiento'] as String? ??
+              DateFormat('yyyy-MM-dd').format(DateTime(1900, 1, 1)),
+          edad: _formDataMap['edad'] as int?,
+          sexoasignadonacimiento:
+          _formDataMap['sexo_asignado_nacimiento'] as String?,
+          generoidentificado: _formDataMap['genero_identificado'] as String?,
+          orientacionsexual: _formDataMap['orientacion_sexual'] as String?,
+          grupoetnico: _formDataMap['grupo_etnico'] as String?,
+          otrogrupoetnico: _formDataMap['otro_grupo_etnico'] as String?, // Usar snake_case
+          poblacioncondicionsituacion:
+          _formDataMap['poblacion_condicion_situacion'] as String?,
+          poblacionmigrante: _formDataMap['poblacion_migrante'] as String?,
+          tieneseressintientes:
+          _formDataMap['tiene_seres_sintientes'] as String?,
+          correoelectronico: _formDataMap['correo_electronico'] as String?,
+          telefonocontacto: _formDataMap['telefono_contacto']?.toString(),
+          direccionresidencia: _formDataMap['direccion_residencia'] as String?,
+          barriocorregimientovereda:
+          _formDataMap['barrio_corregimiento_vereda'] as String?,
+          comuna: _formDataMap['comuna'] as String?,
+          eapb: _formDataMap['eapb'] as String?,
+          tipoaseguramiento: _formDataMap['tipo_aseguramiento'] as String?,
+          eps: _formDataMap['eps'] as String?,
+          talla: double.tryParse(
+              _formDataMap['talla']?.toString().replaceAll(',', '.') ?? ''),
+          peso: double.tryParse(
+              _formDataMap['peso']?.toString().replaceAll(',', '.') ?? ''),
+          imc: _imcCalculadoDisplay?.toStringAsFixed(1), // Convertir a String para la BD
+          clasificacionimc: _clasificacionImcDisplay, // Es String en la BD
+          presionsistolica:
+          int.tryParse(_formDataMap['presion_sistolica']?.toString() ?? ''),
+          presiondiastolica:
+          int.tryParse(_formDataMap['presion_diastolica']?.toString() ?? ''),
+          circunferenciaabdominal: double.tryParse(
+              _formDataMap['circunferencia_abdominal']?.toString().replaceAll(',', '.') ?? ''),
+          actividadfisica: _formDataMap['actividad_fisica'] as String?,
+          frecuenciafrutasverduras:
+          _formDataMap['frecuencia_frutas_verduras'] as String?,
+          medicacionhipertension:
+          _formDataMap['medicacion_hipertension'] as String?,
+          glucosaaltahistorico:
+          _formDataMap['glucosa_alta_historico'] as String?,
+          antecedentesfamiliaresdiabetes:
+          _formDataMap['antecedentes_familiares_diabetes'] as String?,
+          esdiabetico: _formDataMap['es_diabetico'] as String?,
+          tipodiabetes: _formDataMap['tipo_diabetes'] as String?,
+          fuma: _formDataMap['fuma'] as String?,
+          puntajefindrisccalculado: _puntajeFindriscDisplay?.toInt(), // Convertir a int para la BD
+          riesgofindrisc: _riesgoFindriscDisplay,
+          enfermedadcardiovascularrenalcolesterol:
+          _formDataMap['enfermedad_cardiovascular_renal_colesterol']
+          as String?,
+          riesgocardiovascularomsporcentaje: _riesgoOmsPorcentajeDisplay,
+          clasificacionriesgocardiovascularoms: _clasificacionOmsDisplay,
+          observaciones: _formDataMap['observaciones'] as String?,
+          fecharegistrobd: _formDataMap['fecha_registro_bd'] as String?,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Tamizaje guardado con éxito!'),
               backgroundColor: Colors.green),
         );
       } else {
-        if (tamizajeParaGardar.id == null) {
+        // Actualizando tamizaje existente
+        if (currentId == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content: Text(
@@ -771,10 +756,10 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
           );
           return;
         }
-        // ! CORRECCIÓN: Usar SQLiteManager.instance para llamar a checkNumeroDocumentoExists
-        bool docExists = await SQLiteManager.instance
-            .checkNumeroDocumentoExists(tamizajeParaGardar.numeroDocumento,
-                currentId: tamizajeParaGardar.id);
+
+        bool docExists = await SQLiteManager.instance.checkNumeroDocumentoExists(
+            _formDataMap['numero_documento'] as int,
+            currentId: currentId);
         if (docExists) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -784,8 +769,80 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
           );
           return;
         }
-        // ! CORRECCIÓN: Usar SQLiteManager.instance para llamar a updateTamizaje (renombrado de updateTamizajes)
-        await SQLiteManager.instance.updateTamizaje(tamizajeParaGardar);
+
+        await SQLiteManager.instance.updateTamizaje(
+          id: currentId,
+          fechaintervencion: _formDataMap['fecha_intervencion'] as String?,
+          lugarintervencion: _formDataMap['lugar_intervencion'] as String?,
+          entornointervencion: _formDataMap['entorno_intervencion'] as String?,
+          horainicialintervencion:
+          _formDataMap['hora_inicial_intervencion'] as String?,
+          horafinalintervencion:
+          _formDataMap['hora_final_intervencion'] as String?,
+          codigotamizajemanual:
+          _formDataMap['codigo_tamizaje_manual'] as String?,
+          nombres: _formDataMap['nombres'] as String?,
+          apellidos: _formDataMap['apellidos'] as String?,
+          tipodoc: _formDataMap['tipo_doc'] as String?,
+          numerodocumento:
+          int.tryParse(_formDataMap['numero_documento']?.toString() ?? ''),
+          nacionalidad: _formDataMap['nacionalidad'] as String?,
+          fechanacimiento: _formDataMap['fecha_nacimiento'] as String?,
+          edad: _formDataMap['edad'] as int?,
+          sexoasignadonacimiento:
+          _formDataMap['sexo_asignado_nacimiento'] as String?,
+          generoidentificado: _formDataMap['genero_identificado'] as String?,
+          orientacionsexual: _formDataMap['orientacion_sexual'] as String?,
+          grupoetnico: _formDataMap['grupo_etnico'] as String?,
+          otrogrupoetnico: _formDataMap['otro_grupo_etnico'] as String?,
+          poblacioncondicionsituacion:
+          _formDataMap['poblacion_condicion_situacion'] as String?,
+          poblacionmigrante: _formDataMap['poblacion_migrante'] as String?,
+          tieneseressintientes:
+          _formDataMap['tiene_seres_sintientes'] as String?,
+          correoelectronico: _formDataMap['correo_electronico'] as String?,
+          telefonocontacto: _formDataMap['telefono_contacto']?.toString(),
+          direccionresidencia: _formDataMap['direccion_residencia'] as String?,
+          barriocorregimientovereda:
+          _formDataMap['barrio_corregimiento_vereda'] as String?,
+          comuna: _formDataMap['comuna'] as String?,
+          eapb: _formDataMap['eapb'] as String?,
+          tipoaseguramiento: _formDataMap['tipo_aseguramiento'] as String?,
+          eps: _formDataMap['eps'] as String?,
+          talla: double.tryParse(
+              _formDataMap['talla']?.toString().replaceAll(',', '.') ?? ''),
+          peso: double.tryParse(
+              _formDataMap['peso']?.toString().replaceAll(',', '.') ?? ''),
+          imc: _imcCalculadoDisplay?.toStringAsFixed(1), // Convertir a String para la BD
+          clasificacionimc: _clasificacionImcDisplay, // Es String en la BD
+          presionsistolica:
+          int.tryParse(_formDataMap['presion_sistolica']?.toString() ?? ''),
+          presiondiastolica:
+          int.tryParse(_formDataMap['presion_diastolica']?.toString() ?? ''),
+          circunferenciaabdominal: double.tryParse(
+              _formDataMap['circunferencia_abdominal']?.toString().replaceAll(',', '.') ?? ''),
+          actividadfisica: _formDataMap['actividad_fisica'] as String?,
+          frecuenciafrutasverduras:
+          _formDataMap['frecuencia_frutas_verduras'] as String?,
+          medicacionhipertension:
+          _formDataMap['medicacion_hipertension'] as String?,
+          glucosaaltahistorico:
+          _formDataMap['glucosa_alta_historico'] as String?,
+          antecedentesfamiliaresdiabetes:
+          _formDataMap['antecedentes_familiares_diabetes'] as String?,
+          esdiabetico: _formDataMap['es_diabetico'] as String?,
+          tipodiabetes: _formDataMap['tipo_diabetes'] as String?,
+          fuma: _formDataMap['fuma'] as String?,
+          puntajefindrisccalculado: _puntajeFindriscDisplay?.toInt(), // Convertir a int para la BD
+          riesgofindrisc: _riesgoFindriscDisplay,
+          enfermedadcardiovascularrenalcolesterol:
+          _formDataMap['enfermedad_cardiovascular_renal_colesterol']
+          as String?,
+          riesgocardiovascularomsporcentaje: _riesgoOmsPorcentajeDisplay,
+          clasificacionriesgocardiovascularoms: _clasificacionOmsDisplay,
+          observaciones: _formDataMap['observaciones'] as String?,
+          fecharegistrobd: _formDataMap['fecha_registro_bd'] as String?,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Tamizaje actualizado con éxito!'),
@@ -793,12 +850,13 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
         );
       }
       widget.onSaveComplete();
-    } catch (e) {
+    } catch (e, s) {
       debugPrint('Error al guardar/actualizar tamizaje en la BD: $e');
+      debugPrint('StackTrace: $s');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text('Error al guardar los datos en la BD: ${e.toString()}'),
+            content: Text(
+                'Error interno al preparar los datos: ${e.toString().split('\n').first}. Revisa la consola para detalles.'),
             backgroundColor: Colors.red),
       );
     }
@@ -807,7 +865,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
   Future<void> _selectFecha(BuildContext context, String mapKey,
       {bool isBirthDate = false, FormFieldState<DateTime>? field}) async {
     DateTime? initialDateValue = _formDataMap[mapKey] != null &&
-            (_formDataMap[mapKey] as String).isNotEmpty
+        (_formDataMap[mapKey] as String).isNotEmpty
         ? DateFormat('yyyy-MM-dd').tryParse(_formDataMap[mapKey] as String)
         : null;
 
@@ -851,10 +909,10 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
               ),
               FormField<DateTime>(
                   initialValue: _formDataMap['fecha_intervencion'] != null &&
-                          (_formDataMap['fecha_intervencion'] as String)
-                              .isNotEmpty
+                      (_formDataMap['fecha_intervencion'] as String)
+                          .isNotEmpty
                       ? DateFormat('yyyy-MM-dd').tryParse(
-                          _formDataMap['fecha_intervencion'] as String)
+                      _formDataMap['fecha_intervencion'] as String)
                       : DateTime.now(), // Valor inicial para el picker
                   validator: (value) {
                     if (_formDataMap['fecha_intervencion'] == null ||
@@ -878,12 +936,12 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                             fillColor: ffTheme.secondaryBackground),
                         child: Text(
                           _formDataMap['fecha_intervencion'] != null &&
-                                  (_formDataMap['fecha_intervencion'] as String)
-                                      .isNotEmpty
+                              (_formDataMap['fecha_intervencion'] as String)
+                                  .isNotEmpty
                               ? DateFormat('dd/MM/yyyy', 'es_CO').format(
-                                  DateFormat('yyyy-MM-dd').parse(
-                                      _formDataMap['fecha_intervencion']
-                                          as String))
+                              DateFormat('yyyy-MM-dd').parse(
+                                  _formDataMap['fecha_intervencion']
+                                  as String))
                               : 'Seleccionar fecha',
                           style: ffTheme.bodyMedium,
                         ),
@@ -915,13 +973,13 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesEntorno
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('entorno_intervencion', val),
                 validator: (val) =>
-                    val == null ? 'Seleccione un entorno' : null,
+                val == null ? 'Seleccione un entorno' : null,
               ),
               // TODO: Añadir campos para hora_inicial_intervencion y hora_final_intervencion (usar TimePicker o TextFormField con validación de formato)
               const SizedBox(height: 24),
@@ -988,8 +1046,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _tiposDocumento
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) => _updateFormDataField('tipo_doc', val),
                 validator: (val) => val == null ? 'Seleccione un tipo' : null,
@@ -997,8 +1055,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
               const SizedBox(height: 12),
               TextFormField(
                 initialValue:
-                    (_formDataMap['numero_documento'] as num?)?.toString() ??
-                        '',
+                (_formDataMap['numero_documento'] as num?)?.toString() ??
+                    '',
                 decoration: InputDecoration(
                     labelText: 'Número de Documento*',
                     border: OutlineInputBorder(
@@ -1009,8 +1067,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 keyboardType: TextInputType.number,
                 onChanged:
                     (val) => // CORRECCIÓN 1: Asegura que se guarde un int?
-                        _updateFormDataField(
-                            'numero_documento', int.tryParse(val)),
+                _updateFormDataField(
+                    'numero_documento', int.tryParse(val)),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty)
                     return 'Número requerido';
@@ -1022,10 +1080,10 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
               const SizedBox(height: 12),
               FormField<DateTime>(
                   initialValue: _formDataMap['fecha_nacimiento'] != null &&
-                          (_formDataMap['fecha_nacimiento'] as String)
-                              .isNotEmpty
+                      (_formDataMap['fecha_nacimiento'] as String)
+                          .isNotEmpty
                       ? DateFormat('yyyy-MM-dd')
-                          .tryParse(_formDataMap['fecha_nacimiento'] as String)
+                      .tryParse(_formDataMap['fecha_nacimiento'] as String)
                       : null,
                   validator: (value) {
                     if (_formDataMap['fecha_nacimiento'] == null ||
@@ -1048,12 +1106,12 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                             fillColor: ffTheme.secondaryBackground),
                         child: Text(
                           _formDataMap['fecha_nacimiento'] != null &&
-                                  (_formDataMap['fecha_nacimiento'] as String)
-                                      .isNotEmpty
+                              (_formDataMap['fecha_nacimiento'] as String)
+                                  .isNotEmpty
                               ? DateFormat('dd/MM/yyyy', 'es_CO').format(
-                                  DateFormat('yyyy-MM-dd').parse(
-                                      _formDataMap['fecha_nacimiento']
-                                          as String))
+                              DateFormat('yyyy-MM-dd').parse(
+                                  _formDataMap['fecha_nacimiento']
+                                  as String))
                               : 'Seleccionar fecha',
                           style: ffTheme.bodyMedium,
                         ),
@@ -1090,8 +1148,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesSexoAsignado
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('sexo_asignado_nacimiento', val),
@@ -1109,10 +1167,10 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 isExpanded: true,
                 items: _opcionesGeneroIdentificado
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label,
-                            style: ffTheme.bodyMedium,
-                            overflow: TextOverflow.ellipsis)))
+                    value: label,
+                    child: Text(label,
+                        style: ffTheme.bodyMedium,
+                        overflow: TextOverflow.ellipsis)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('genero_identificado', val),
@@ -1129,8 +1187,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesOrientacionSexual
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('orientacion_sexual', val),
@@ -1147,8 +1205,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                   style: ffTheme.bodyMedium,
                   items: _opcionesGrupoEtnico
                       .map((label) => DropdownMenuItem(
-                          value: label,
-                          child: Text(label, style: ffTheme.bodyMedium)))
+                      value: label,
+                      child: Text(label, style: ffTheme.bodyMedium)))
                       .toList(),
                   onChanged: (val) {
                     _updateFormDataField('grupo_etnico', val);
@@ -1157,7 +1215,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                       _updateFormDataField('otro_grupo_etnico', null);
                     }
                     setState(
-                        () {}); // Para reconstruir y mostrar/ocultar el campo "otro"
+                            () {}); // Para reconstruir y mostrar/ocultar el campo "otro"
                   }),
               if (_formDataMap['grupo_etnico'] == 'Otro') ...[
                 const SizedBox(height: 12),
@@ -1188,10 +1246,10 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 isExpanded: true,
                 items: _opcionesPoblacionCondicion
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label,
-                            style: ffTheme.bodyMedium,
-                            overflow: TextOverflow.ellipsis)))
+                    value: label,
+                    child: Text(label,
+                        style: ffTheme.bodyMedium,
+                        overflow: TextOverflow.ellipsis)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('poblacion_condicion_situacion', val),
@@ -1208,8 +1266,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesPoblacionMigrante
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('poblacion_migrante', val),
@@ -1226,8 +1284,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesSiNo
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('tiene_seres_sintientes', val),
@@ -1285,7 +1343,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
               const SizedBox(height: 12),
               TextFormField(
                 initialValue:
-                    _formDataMap['barrio_corregimiento_vereda'] as String?,
+                _formDataMap['barrio_corregimiento_vereda'] as String?,
                 decoration: InputDecoration(
                     labelText: 'Barrio/Corregimiento/Vereda',
                     border: OutlineInputBorder(
@@ -1308,8 +1366,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesComuna
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) => _updateFormDataField('comuna', val),
               ),
@@ -1337,16 +1395,16 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesTipoAseguramiento
                     .map((val) => DropdownMenuItem(
-                        value: val,
-                        child: Text(
-                            val == 'C'
-                                ? 'C - Contributivo'
-                                : val == 'S'
-                                    ? 'S - Subsidiado'
-                                    : val == 'SA'
-                                        ? 'SA - Sin Aseguramiento'
-                                        : 'RE - Régimen Especial',
-                            style: ffTheme.bodyMedium)))
+                    value: val,
+                    child: Text(
+                        val == 'C'
+                            ? 'C - Contributivo'
+                            : val == 'S'
+                            ? 'S - Subsidiado'
+                            : val == 'SA'
+                            ? 'SA - Sin Aseguramiento'
+                            : 'RE - Régimen Especial',
+                        style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('tipo_aseguramiento', val),
@@ -1375,7 +1433,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
               ),
               TextFormField(
                   initialValue:
-                      _formDataMap['talla']?.toString().replaceAll('.', ','),
+                  _formDataMap['talla']?.toString().replaceAll('.', ','),
                   decoration: InputDecoration(
                       labelText: 'Talla (metros) Ej: 1,75',
                       border: OutlineInputBorder(
@@ -1384,14 +1442,14 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                       fillColor: ffTheme.secondaryBackground),
                   style: ffTheme.bodyMedium,
                   keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (val) => // CORRECCIÓN 2: Guarda double?
-                      _updateFormDataField(
-                          'talla', double.tryParse(val.replaceAll(',', '.'))),
+                  _updateFormDataField(
+                      'talla', double.tryParse(val.replaceAll(',', '.'))),
                   validator: (val) {
                     if (val != null && val.isNotEmpty) {
                       final parsedVal =
-                          double.tryParse(val.replaceAll(',', '.'));
+                      double.tryParse(val.replaceAll(',', '.'));
                       if (parsedVal == null) return 'Número inválido';
                       if (parsedVal <= 0.5 || parsedVal > 2.5)
                         return 'Valor fuera de rango (0.5-2.5m)';
@@ -1401,7 +1459,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
               const SizedBox(height: 12),
               TextFormField(
                   initialValue:
-                      _formDataMap['peso']?.toString().replaceAll('.', ','),
+                  _formDataMap['peso']?.toString().replaceAll('.', ','),
                   decoration: InputDecoration(
                       labelText: 'Peso (Kg) Ej: 70,5',
                       border: OutlineInputBorder(
@@ -1410,14 +1468,14 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                       fillColor: ffTheme.secondaryBackground),
                   style: ffTheme.bodyMedium,
                   keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (val) => // CORRECCIÓN 3: Guarda double?
-                      _updateFormDataField(
-                          'peso', double.tryParse(val.replaceAll(',', '.'))),
+                  _updateFormDataField(
+                      'peso', double.tryParse(val.replaceAll(',', '.'))),
                   validator: (val) {
                     if (val != null && val.isNotEmpty) {
                       final parsedVal =
-                          double.tryParse(val.replaceAll(',', '.'));
+                      double.tryParse(val.replaceAll(',', '.'));
                       if (parsedVal == null) return 'Número inválido';
                       if (parsedVal <= 1 || parsedVal > 300)
                         return 'Valor fuera de rango (1-300kg)';
@@ -1434,7 +1492,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
               const SizedBox(height: 12),
               TextFormField(
                 initialValue:
-                    (_formDataMap['presion_sistolica'] as num?)?.toString(),
+                (_formDataMap['presion_sistolica'] as num?)?.toString(),
                 decoration: InputDecoration(
                     labelText: 'Presión Sistólica (mmHg)',
                     border: OutlineInputBorder(
@@ -1444,13 +1502,13 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 keyboardType: TextInputType.number,
                 onChanged: (val) => // CORRECCIÓN 4: Guarda int?
-                    _updateFormDataField(
-                        'presion_sistolica', int.tryParse(val)),
+                _updateFormDataField(
+                    'presion_sistolica', int.tryParse(val)),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 initialValue:
-                    (_formDataMap['presion_diastolica'] as num?)?.toString(),
+                (_formDataMap['presion_diastolica'] as num?)?.toString(),
                 decoration: InputDecoration(
                     labelText: 'Presión Diastólica (mmHg)',
                     border: OutlineInputBorder(
@@ -1460,8 +1518,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 keyboardType: TextInputType.number,
                 onChanged: (val) => // CORRECCIÓN 5: Guarda int?
-                    _updateFormDataField(
-                        'presion_diastolica', int.tryParse(val)),
+                _updateFormDataField(
+                    'presion_diastolica', int.tryParse(val)),
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -1476,10 +1534,10 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                     fillColor: ffTheme.secondaryBackground),
                 style: ffTheme.bodyMedium,
                 keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (val) => // CORRECCIÓN 6: Guarda double?
-                    _updateFormDataField('circunferencia_abdominal',
-                        double.tryParse(val.replaceAll(',', '.'))),
+                _updateFormDataField('circunferencia_abdominal',
+                    double.tryParse(val.replaceAll(',', '.'))),
               ),
               const SizedBox(height: 24),
 
@@ -1502,13 +1560,13 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesSiNo
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('actividad_fisica', val),
                 validator: (val) =>
-                    val == null ? 'Seleccione una opción' : null,
+                val == null ? 'Seleccione una opción' : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
@@ -1522,13 +1580,13 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesFrecuenciaFrutasVerduras
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('frecuencia_frutas_verduras', val),
                 validator: (val) =>
-                    val == null ? 'Seleccione una opción' : null,
+                val == null ? 'Seleccione una opción' : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
@@ -1542,13 +1600,13 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesSiNo
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('medicacion_hipertension', val),
                 validator: (val) =>
-                    val == null ? 'Seleccione una opción' : null,
+                val == null ? 'Seleccione una opción' : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
@@ -1562,18 +1620,18 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesSiNo
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) =>
                     _updateFormDataField('glucosa_alta_historico', val),
                 validator: (val) =>
-                    val == null ? 'Seleccione una opción' : null,
+                val == null ? 'Seleccione una opción' : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 value:
-                    _formDataMap['antecedentes_familiares_diabetes'] as String?,
+                _formDataMap['antecedentes_familiares_diabetes'] as String?,
                 decoration: InputDecoration(
                     labelText: '¿Diabetes en familiares?*',
                     border: OutlineInputBorder(
@@ -1584,15 +1642,15 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 isExpanded: true,
                 items: _opcionesAntecedentesDiabetes
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label,
-                            style: ffTheme.bodyMedium,
-                            overflow: TextOverflow.ellipsis)))
+                    value: label,
+                    child: Text(label,
+                        style: ffTheme.bodyMedium,
+                        overflow: TextOverflow.ellipsis)))
                     .toList(),
                 onChanged: (val) => _updateFormDataField(
                     'antecedentes_familiares_diabetes', val),
                 validator: (val) =>
-                    val == null ? 'Seleccione una opción' : null,
+                val == null ? 'Seleccione una opción' : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
@@ -1606,8 +1664,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesSiNo
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) {
                   _updateFormDataField('es_diabetico', val);
@@ -1615,10 +1673,10 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                     _updateFormDataField('tipo_diabetes', 'No aplica');
                   }
                   setState(
-                      () {}); // Para reconstruir y mostrar/ocultar tipo_diabetes
+                          () {}); // Para reconstruir y mostrar/ocultar tipo_diabetes
                 },
                 validator: (val) =>
-                    val == null ? 'Seleccione una opción' : null,
+                val == null ? 'Seleccione una opción' : null,
               ),
               if (_formDataMap['es_diabetico'] == 'Sí') ...[
                 const SizedBox(height: 12),
@@ -1633,15 +1691,15 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                   style: ffTheme.bodyMedium,
                   items: _opcionesTipoDiabetes
                       .map((label) => DropdownMenuItem(
-                          value: label,
-                          child: Text(label, style: ffTheme.bodyMedium)))
+                      value: label,
+                      child: Text(label, style: ffTheme.bodyMedium)))
                       .toList(),
                   onChanged: (val) =>
                       _updateFormDataField('tipo_diabetes', val),
                   validator: (val) =>
-                      (_formDataMap['es_diabetico'] == 'Sí' && val == null)
-                          ? 'Seleccione un tipo'
-                          : null,
+                  (_formDataMap['es_diabetico'] == 'Sí' && val == null)
+                      ? 'Seleccione un tipo'
+                      : null,
                 ),
               ],
               const SizedBox(height: 12),
@@ -1656,12 +1714,12 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesSiNo
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) => _updateFormDataField('fuma', val),
                 validator: (val) =>
-                    val == null ? 'Seleccione una opción' : null,
+                val == null ? 'Seleccione una opción' : null,
               ),
               if (_riesgoFindriscDisplay != null)
                 Padding(
@@ -1681,8 +1739,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
               ),
               DropdownButtonFormField<String>(
                 value:
-                    _formDataMap['enfermedad_cardiovascular_renal_colesterol']
-                        as String?,
+                _formDataMap['enfermedad_cardiovascular_renal_colesterol']
+                as String?,
                 decoration: InputDecoration(
                     labelText: '¿Tiene ya ECV, ERC, Hipercolesterolemia?*',
                     border: OutlineInputBorder(
@@ -1692,13 +1750,13 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
                 style: ffTheme.bodyMedium,
                 items: _opcionesSiNo
                     .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label, style: ffTheme.bodyMedium)))
+                    value: label,
+                    child: Text(label, style: ffTheme.bodyMedium)))
                     .toList(),
                 onChanged: (val) => _updateFormDataField(
                     'enfermedad_cardiovascular_renal_colesterol', val),
                 validator: (val) =>
-                    val == null ? 'Seleccione una opción' : null,
+                val == null ? 'Seleccione una opción' : null,
               ),
               if (_riesgoOmsPorcentajeDisplay != null)
                 Padding(

@@ -6,13 +6,22 @@ import '/backend/sqlite/sqlite_manager.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 import 'flutter_flow/internationalization.dart';
-import 'index.dart';
+import 'index.dart'; // Importa todas las páginas y el AppStateNotifier, etc.
+import 'package:go_router/go_router.dart'; // Asegúrate de que GoRouter esté importado
+
+// Mover estas importaciones al principio del archivo
+import 'pages/home_page/home_page_widget.dart';
+import 'pages/dashboard/dashboard_widget.dart';
+import 'pages/form/form_widget.dart';
+import 'pages/list/list_widget.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 
+  // Inicializa SQLiteManager antes de runApp
   await SQLiteManager.initialize();
 
   runApp(MyApp());
@@ -34,8 +43,10 @@ class _MyAppState extends State<MyApp> {
 
   late AppStateNotifier _appStateNotifier;
   late GoRouter _router;
-  String getRoute([RouteMatch? routeMatch]) {
-    final RouteMatch lastMatch =
+
+  // Ajuste en la firma para aceptar RouteMatchBase y manejar la conversión
+  String getRoute([RouteMatchBase? routeMatch]) {
+    final RouteMatchBase lastMatch =
         routeMatch ?? _router.routerDelegate.currentConfiguration.last;
     final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
         ? lastMatch.matches
@@ -43,9 +54,10 @@ class _MyAppState extends State<MyApp> {
     return matchList.uri.toString();
   }
 
+  // Ajuste en el mapeo para asegurar que 'e' sea tratado como RouteMatch si es posible
   List<String> getRouteStack() =>
       _router.routerDelegate.currentConfiguration.matches
-          .map((e) => getRoute(e))
+          .map((e) => getRoute(e is RouteMatch ? e : null)) // <--- CORRECCIÓN CLAVE AQUÍ
           .toList();
 
   @override
@@ -61,8 +73,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void setThemeMode(ThemeMode mode) => safeSetState(() {
-        _themeMode = mode;
-      });
+    _themeMode = mode;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +86,8 @@ class _MyAppState extends State<MyApp> {
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
+        // Estos Fallback delegates son útiles si tienes problemas con la localización
+        // Si no los necesitas y quieres simplificar, puedes eliminarlos.
         FallbackMaterialLocalizationDelegate(),
         FallbackCupertinoLocalizationDelegate(),
       ],
@@ -83,7 +97,7 @@ class _MyAppState extends State<MyApp> {
       ],
       theme: ThemeData(
         brightness: Brightness.light,
-        useMaterial3: false,
+        useMaterial3: false, // Mantener según tu configuración de FlutterFlow
       ),
       themeMode: _themeMode,
       routerConfig: _router,
