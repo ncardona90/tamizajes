@@ -3,41 +3,178 @@ import 'package:sqflite/sqflite.dart';
 /// BEGIN CREATETAMIZAJE
 Future performCreateTamizaje(
   Database database, {
+  String? fechaintervencion,
+  String? lugarintervencion,
+  String? entornointervencion,
+  String? horainicialintervencion,
+  String? horafinalintervencion,
+  String? codigotamizajemanual,
   String? nombres,
   String? apellidos,
+  String? tipodoc,
+  int? numerodocumento,
+  String? nacionalidad,
+  String? fechanacimiento,
+  int? edad,
+  String? sexoasignadonacimiento,
+  String? generoidentificado,
+  String? orientacionsexual,
+  String? grupoetnico,
+  String? otrogrupoetnico,
+  String? poblacioncondicionsituacion,
+  String? poblacionmigrante,
+  String? tieneseressintientes,
+  String? correoelectronico,
+  String? telefonocontacto,
+  String? direccionresidencia,
+  String? barriocorregimientovereda,
+  String? comuna,
+  String? eapb,
+  String? tipoaseguramiento,
+  String? eps,
+  double? talla,
+  double? peso,
+  String? imc,
+  String? clasificacionimc,
+  int? presionsistolica,
+  int? presiondiastolica,
+  double? circunferenciaabdominal,
+  String? actividadfisica,
+  String? frecuenciafrutasverduras,
+  String? medicacionhipertension,
+  String? glucosaaltahistorico,
+  String? antecedentesfamiliaresdiabetes,
+  String? esdiabetico,
+  String? tipodiabetes,
+  String? fuma,
+  int? puntajefindrisccalculado,
+  String? riesgofindrisc,
+  String? enfermedadcardiovascularrenalcolesterol,
+  String? riesgocardiovascularomsporcentaje,
+  String? clasificacionriesgocardiovascularoms,
+  String? observaciones,
+  String? fecharegistrobd,
 }) {
   final query = '''
-insert into  tamizajes(nombres,apellidos) values('${nombres}','${apellidos}'); 
+insert into tamizaje (
+    fecha_intervencion,
+    lugar_intervencion,
+    entorno_intervencion,
+    hora_inicial_intervencion,
+    hora_final_intervencion,
+
+    codigo_tamizaje_manual,
+    nombres,
+    apellidos,
+    tipo_doc,
+    numero_documento,
+    nacionalidad,
+    fecha_nacimiento,
+    edad,
+    sexo_asignado_nacimiento,
+    genero_identificado,
+    orientacion_sexual,
+    grupo_etnico,
+    otro_grupo_etnico,
+    poblacion_condicion_situacion,
+    poblacion_migrante,
+    tiene_seres_sintientes,
+    correo_electronico,
+    telefono_contacto,
+    direccion_residencia,
+    barrio_corregimiento_vereda,
+    comuna,
+    eapb,
+    tipo_aseguramiento,
+    eps,
+
+    talla,
+    peso,
+    imc,
+    clasificacion_imc,
+    presion_sistolica,
+    presion_diastolica,
+    circunferencia_abdominal,
+
+    actividad_fisica,
+    frecuencia_frutas_verduras,
+    medicacion_hipertension,
+    glucosa_alta_historico,
+    antecedentes_familiares_diabetes,
+    es_diabetico,
+    tipo_diabetes,
+    fuma,
+    puntaje_findrisc_calculado,
+    riesgo_findrisc,
+
+    enfermedad_cardiovascular_renal_colesterol,
+    riesgo_cardiovascular_oms_porcentaje,
+    clasificacion_riesgo_cardiovascular_oms,
+
+    observaciones,
+    fecha_registro_bd
+)
+values (
+    '${fechaintervencion}',
+    '${lugarintervencion}',
+    '${entornointervencion}',
+    '${horainicialintervencion}',
+    '${horafinalintervencion}',
+
+    '${codigotamizajemanual}',
+    '${nombres}',
+    '${apellidos}',
+    '${tipodoc}',
+    '${numerodocumento}',
+    '${nacionalidad}',
+    '${fechanacimiento}',
+    '${edad}',
+    '${sexoasignadonacimiento}',
+    '${generoidentificado}',
+    '${orientacionsexual}',
+    '${grupoetnico}',
+    '${otrogrupoetnico}',
+    '${poblacioncondicionsituacion}',
+    '${poblacionmigrante}',
+    '${tieneseressintientes}',
+    '${correoelectronico}',
+    '${telefonocontacto}',
+    '${direccionresidencia}',
+    '${barriocorregimientovereda}',
+    '${comuna}',
+    '${eapb}',
+    '${tipoaseguramiento}',
+    '${eps}',
+
+    '${talla}',
+    '${peso}',
+    '${imc}',
+    '${clasificacionimc}',
+    '${presionsistolica}',
+    '${presiondiastolica}',
+    '${circunferenciaabdominal}',
+
+    '${actividadfisica}',
+    '${frecuenciafrutasverduras}',
+    '${medicacionhipertension}',
+    '${glucosaaltahistorico}',
+    '${antecedentesfamiliaresdiabetes}',
+    '${esdiabetico}',
+    '${tipodiabetes}',
+    '${fuma}',
+    '${puntajefindrisccalculado}',
+    '${riesgofindrisc}',
+
+    '${enfermedadcardiovascularrenalcolesterol}',
+    '${riesgocardiovascularomsporcentaje}',
+    '${clasificacionriesgocardiovascularoms}',
+
+    '${observaciones}',
+    '${fecharegistrobd}'
+);
+
 ''';
   return database.rawQuery(query);
 }
 
 /// END CREATETAMIZAJE
-
-/// BEGIN UPDATETAMIZAJES
-Future performUpdateTamizajes(
-  Database database, {
-  String? nombres,
-  String? apellidos,
-  int? id,
-}) {
-  final query = '''
-update tamizajes set nombres='${nombres}',apellidos='${apellidos}' where id=${id} 
-''';
-  return database.rawQuery(query);
-}
-
-/// END UPDATETAMIZAJES
-
-/// BEGIN DELETETAMIZAJES
-Future performDeleteTamizajes(
-  Database database, {
-  int? id,
-}) {
-  final query = '''
-DELETE FROM tamizajes WHERE ID = ${id};
-''';
-  return database.rawQuery(query);
-}
-
-/// END DELETETAMIZAJES

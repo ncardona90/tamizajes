@@ -13,9 +13,7 @@ import 'package:flutter/material.dart';
 
 // Importación necesaria para DateFormat
 import 'package:intl/intl.dart';
-// Importación directa a tu helper de SQLite.
-// Asegúrate de que la ruta sea correcta si sqlite_helper.dart está en una subcarpeta de custom_code.
-import '/custom_code/sqlite_helper.dart'; // Contiene SQLiteHelper y Tamizaje
+import 'package:sqflite/sqflite.dart';
 
 class FormularioCompletoWidget extends StatefulWidget {
   const FormularioCompletoWidget({
@@ -43,7 +41,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
 
   Map<String, dynamic> _formDataMap = {};
   bool _isEditing = false;
-  final SQLiteHelper dbHelper = SQLiteHelper();
+  // ! CORRECCIÓN: Ya no se instancia SQLiteHelper, se usa SQLiteManager.instance directamente.
+  // final SQLiteHelper dbHelper = SQLiteHelper(); // ELIMINAR O COMENTAR
 
   // Variables para mostrar resultados de cálculos en la UI
   int? _edadCalculadaDisplay;
@@ -379,6 +378,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
     if (widget.initialTamizajeData != null) {
       Map<String, dynamic>? initialMap;
       if (widget.initialTamizajeData is Tamizaje) {
+        // ! CORRECCIÓN: Usar Tamizaje
         initialMap = (widget.initialTamizajeData as Tamizaje).toMap();
         _isEditing = true;
       } else if (widget.initialTamizajeData is Map<String, dynamic>) {
@@ -433,7 +433,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
       'genero_identificado': null,
       'orientacion_sexual': null,
       'grupo_etnico': null,
-      'otro_grupo_etnico': null,
+      'otroGrupoEtnico': null,
       'poblacion_condicion_situacion': 'Ninguna',
       'poblacion_migrante': 'No aplica',
       'tiene_seres_sintientes': 'No',
@@ -623,6 +623,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
       _clasificacionOmsDisplay = null;
       _formDataMap['clasificacion_riesgo_cardiovascular_oms'] = null;
     }
+    setState(() {}); // Actualiza la UI después de recalcular
   }
 
   Future<void> _guardarFormulario() async {
@@ -644,6 +645,7 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
     final Tamizaje tamizajeParaGardar;
     try {
       tamizajeParaGardar = Tamizaje(
+        // ! CORRECCIÓN: Usar Tamizaje
         id: _isEditing ? (_formDataMap['id'] as int?) : null,
         fechaIntervencion: _formDataMap['fecha_intervencion'] as String?,
         lugarIntervencion: _formDataMap['lugar_intervencion'] as String?,
@@ -740,7 +742,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
 
     try {
       if (!_isEditing) {
-        bool docExists = await dbHelper
+        // ! CORRECCIÓN: Usar SQLiteManager.instance para llamar a checkNumeroDocumentoExists
+        bool docExists = await SQLiteManager.instance
             .checkNumeroDocumentoExists(tamizajeParaGardar.numeroDocumento);
         if (docExists) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -751,7 +754,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
           );
           return;
         }
-        await dbHelper.createTamizaje(tamizajeParaGardar);
+        // ! CORRECCIÓN: Usar SQLiteManager.instance para llamar a createTamizaje (renombrado de createTamizajes)
+        await SQLiteManager.instance.createTamizaje(tamizajeParaGardar);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Tamizaje guardado con éxito!'),
@@ -767,9 +771,10 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
           );
           return;
         }
-        bool docExists = await dbHelper.checkNumeroDocumentoExists(
-            tamizajeParaGardar.numeroDocumento,
-            currentId: tamizajeParaGardar.id);
+        // ! CORRECCIÓN: Usar SQLiteManager.instance para llamar a checkNumeroDocumentoExists
+        bool docExists = await SQLiteManager.instance
+            .checkNumeroDocumentoExists(tamizajeParaGardar.numeroDocumento,
+                currentId: tamizajeParaGardar.id);
         if (docExists) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -779,7 +784,8 @@ class _FormularioCompletoWidgetState extends State<FormularioCompletoWidget> {
           );
           return;
         }
-        await dbHelper.updateTamizaje(tamizajeParaGardar);
+        // ! CORRECCIÓN: Usar SQLiteManager.instance para llamar a updateTamizaje (renombrado de updateTamizajes)
+        await SQLiteManager.instance.updateTamizaje(tamizajeParaGardar);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Tamizaje actualizado con éxito!'),

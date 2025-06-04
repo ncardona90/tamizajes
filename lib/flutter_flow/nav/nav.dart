@@ -67,11 +67,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: ListWidget.routePath,
           builder: (context, params) =>
               params.isEmpty ? NavBarPage(initialPage: 'List') : ListWidget(),
-        ),
-        FFRoute(
-          name: HhhWidget.routeName,
-          path: HhhWidget.routePath,
-          builder: (context, params) => HhhWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
