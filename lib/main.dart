@@ -1,212 +1,139 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_web_plugins/url_strategy.dart';
-import '/backend/sqlite/sqlite_manager.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import 'flutter_flow/flutter_flow_util.dart';
-import 'flutter_flow/internationalization.dart';
-import 'index.dart'; // Importa todas las páginas y el AppStateNotifier, etc.
-import 'package:go_router/go_router.dart'; // Asegúrate de que GoRouter esté importado
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'custom_code/sqlite_helper.dart';
 
-// Mover estas importaciones al principio del archivo
 import 'pages/home_page/home_page_widget.dart';
+import 'pages/list/list_widget.dart';
 import 'pages/dashboard/dashboard_widget.dart';
 import 'pages/form/form_widget.dart';
-import 'pages/list/list_widget.dart';
 
+class AppStateNotifier extends ChangeNotifier {}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  GoRouter.optionURLReflectsImperativeAPIs = true;
-  usePathUrlStrategy();
-
-  // Inicializa SQLiteManager antes de runApp
-  await SQLiteManager.initialize();
-
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AppStateNotifier(),
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatefulWidget {
-  // This widget is the root of your application.
-  @override
-  State<MyApp> createState() => _MyAppState();
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-  static _MyAppState of(BuildContext context) =>
-      context.findAncestorStateOfType<_MyAppState>()!;
-}
-
-class _MyAppState extends State<MyApp> {
-  Locale? _locale;
-
-  ThemeMode _themeMode = ThemeMode.system;
-
-  late AppStateNotifier _appStateNotifier;
-  late GoRouter _router;
-
-  // Ajuste en la firma para aceptar RouteMatchBase y manejar la conversión
-  String getRoute([RouteMatchBase? routeMatch]) {
-    final RouteMatchBase lastMatch =
-        routeMatch ?? _router.routerDelegate.currentConfiguration.last;
-    final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
-        ? lastMatch.matches
-        : _router.routerDelegate.currentConfiguration;
-    return matchList.uri.toString();
-  }
-
-  // Ajuste en el mapeo para asegurar que 'e' sea tratado como RouteMatch si es posible
-  List<String> getRouteStack() =>
-      _router.routerDelegate.currentConfiguration.matches
-          .map((e) => getRoute(e is RouteMatch ? e : null)) // <--- CORRECCIÓN CLAVE AQUÍ
-          .toList();
-
-  @override
-  void initState() {
-    super.initState();
-
-    _appStateNotifier = AppStateNotifier.instance;
-    _router = createRouter(_appStateNotifier);
-  }
-
-  void setLocale(String language) {
-    safeSetState(() => _locale = createLocale(language));
-  }
-
-  void setThemeMode(ThemeMode mode) => safeSetState(() {
-    _themeMode = mode;
-  });
+  // --- INICIO DE LA CORRECCIÓN ---
+  // El GoRouter ahora usa una "ShellRoute" para la barra de navegación.
+  // Esto asegura que la barra de navegación se mantenga visible en las
+  // páginas principales (Home, Lista, Dashboard).
+  static final _router = GoRouter(
+    initialLocation: '/homePage', // La ruta inicial ahora es la del Home
+    routes: [
+      // ShellRoute actúa como el contenedor con la barra de navegación
+      ShellRoute(
+        builder: (context, state, child) {
+          return NavBarPage(child: child); // NavBarPage ahora envuelve a las otras páginas
+        },
+        routes: [
+          // Estas son las rutas que aparecerán DENTRO del NavBarPage
+          GoRoute(
+            name: 'HomePage',
+            path: '/homePage',
+            builder: (context, state) => const HomePageWidget(),
+          ),
+          GoRoute(
+            name: 'List',
+            path: '/list',
+            builder: (context, state) => const ListWidget(),
+          ),
+          GoRoute(
+            name: 'Dashboard',
+            path: '/dashboard',
+            builder: (context, state) => const DashboardWidget(),
+          ),
+        ],
+      ),
+      // Esta es una ruta de nivel superior que NO tendrá la barra de navegación,
+      // lo cual es perfecto para el formulario de pantalla completa.
+      GoRoute(
+        name: 'Form',
+        path: '/form',
+        builder: (context, state) {
+          final tamizaje = state.extra as Tamizaje?;
+          return FormWidget(tamizajeForEdit: tamizaje);
+        },
+      ),
+    ],
+  );
+  // --- FIN DE LA CORRECCIÓN ---
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Tamizajes Red Oriente v1',
-      localizationsDelegates: [
-        FFLocalizationsDelegate(),
+      title: 'Tamizajes App',
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
-        // Estos Fallback delegates son útiles si tienes problemas con la localización
-        // Si no los necesitas y quieres simplificar, puedes eliminarlos.
-        FallbackMaterialLocalizationDelegate(),
-        FallbackCupertinoLocalizationDelegate(),
       ],
-      locale: _locale,
-      supportedLocales: const [
-        Locale('es'),
-      ],
-      theme: ThemeData(
-        brightness: Brightness.light,
-        useMaterial3: false, // Mantener según tu configuración de FlutterFlow
-      ),
-      themeMode: _themeMode,
+      supportedLocales: const [Locale('es')],
+      theme: ThemeData(brightness: Brightness.light, useMaterial3: true, colorSchemeSeed: Colors.teal),
+      darkTheme: ThemeData(brightness: Brightness.dark, useMaterial3: true, colorSchemeSeed: Colors.teal),
+      themeMode: ThemeMode.system,
       routerConfig: _router,
     );
   }
 }
 
-class NavBarPage extends StatefulWidget {
-  NavBarPage({
-    Key? key,
-    this.initialPage,
-    this.page,
-    this.disableResizeToAvoidBottomInset = false,
-  }) : super(key: key);
+// --- NavBarPage AHORA ES UN CONTENEDOR MÁS INTELIGENTE ---
+class NavBarPage extends StatelessWidget {
+  const NavBarPage({super.key, required this.child});
 
-  final String? initialPage;
-  final Widget? page;
-  final bool disableResizeToAvoidBottomInset;
-
-  @override
-  _NavBarPageState createState() => _NavBarPageState();
-}
-
-/// This is the private State class that goes with NavBarPage.
-class _NavBarPageState extends State<NavBarPage> {
-  String _currentPageName = 'HomePage';
-  late Widget? _currentPage;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentPageName = widget.initialPage ?? _currentPageName;
-    _currentPage = widget.page;
-  }
+  final Widget child; // El widget de la página actual (Home, Lista, o Dashboard)
 
   @override
   Widget build(BuildContext context) {
-    final tabs = {
-      'HomePage': HomePageWidget(),
-      'Dashboard': DashboardWidget(),
-      'Form': FormWidget(),
-      'List': ListWidget(),
-    };
-    final currentIndex = tabs.keys.toList().indexOf(_currentPageName);
+    // --- INICIO DE LA CORRECCIÓN ---
+    // Se obtiene el estado actual del router para saber la ubicación.
+    final GoRouterState state = GoRouterState.of(context);
+    final String location = state.uri.toString();
+    // --- FIN DE LA CORRECCIÓN ---
+
+    int currentIndex = 0;
+    if (location.startsWith('/list')) {
+      currentIndex = 1;
+    } else if (location.startsWith('/dashboard')) {
+      currentIndex = 2;
+    }
 
     return Scaffold(
-      resizeToAvoidBottomInset: !widget.disableResizeToAvoidBottomInset,
-      body: _currentPage ?? tabs[_currentPageName],
+      body: child,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        onTap: (i) => safeSetState(() {
-          _currentPage = null;
-          _currentPageName = tabs.keys.toList()[i];
-        }),
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        selectedItemColor: FlutterFlowTheme.of(context).primary,
-        unselectedItemColor: FlutterFlowTheme.of(context).secondaryText,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
+        onTap: (i) {
+          switch (i) {
+            case 0:
+              context.go('/homePage');
+              break;
+            case 1:
+              context.go('/list');
+              break;
+            case 2:
+              context.go('/dashboard');
+              break;
+          }
+        },
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
         type: BottomNavigationBarType.fixed,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home_outlined,
-              size: 24.0,
-            ),
-            activeIcon: Icon(
-              Icons.home,
-              size: 24.0,
-            ),
-            label: 'Home',
-            tooltip: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.stairs_outlined,
-              size: 24.0,
-            ),
-            activeIcon: Icon(
-              Icons.stairs,
-              size: 24.0,
-            ),
-            label: 'Home',
-            tooltip: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.playlist_play,
-              size: 24.0,
-            ),
-            activeIcon: Icon(
-              Icons.play_circle,
-              size: 24.0,
-            ),
-            label: 'Home',
-            tooltip: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.list_alt,
-              size: 24.0,
-            ),
-            activeIcon: Icon(
-              Icons.view_list,
-              size: 24.0,
-            ),
-            label: 'Home',
-            tooltip: '',
-          )
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt_outlined), activeIcon: Icon(Icons.list_alt), label: 'Lista'),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart_outlined), activeIcon: Icon(Icons.bar_chart), label: 'Dashboard'),
         ],
       ),
     );

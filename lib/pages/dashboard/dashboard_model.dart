@@ -1,11 +1,5 @@
-import '/flutter_flow/flutter_flow_util.dart';
-import 'dashboard_widget.dart' show DashboardWidget;
-import 'package:flutter/material.dart';
+// Este archivo se mantiene por ahora para evitar romper
+// alguna posible importación residual en el proyecto.
+// Su contenido ya no es necesario para el nuevo DashboardWidget.
 
-class DashboardModel extends FlutterFlowModel<DashboardWidget> {
-  @override
-  void initState(BuildContext context) {}
-
-  @override
-  void dispose() {}
-}
+class DashboardModel {}

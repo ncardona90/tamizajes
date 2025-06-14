@@ -1,0 +1,40 @@
+# Archivos de metadatos de Dart y Flutter.
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Archivos generados por el IDE.
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Archivos de registro y temporales.
+/coverage/
+/doc/api/
+*.log
+
+# Archivos del sistema operativo.
+.DS_Store
+Thumbs.db
+
+# Archivos sensibles que NUNCA deben subirse.
+# ¡Especialmente importante para las claves de firma de Android!
+/android/key.properties
+/ios/Flutter/Key-Debug.xcconfig
+/ios/Flutter/Key-Release.xcconfig
+
+# Archivos de configuración local de Firebase.
+.firebase/
+firebase_options.dart
+
+
+# Keystore files
+*.jks
+
+key.properties

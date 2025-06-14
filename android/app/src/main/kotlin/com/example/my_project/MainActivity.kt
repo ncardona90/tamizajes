@@ -1,4 +1,4 @@
-package com.mycompany.tamizajesredorientev1
+package com.mycompany.tamizajese
 
 import io.flutter.embedding.android.FlutterActivity
 
